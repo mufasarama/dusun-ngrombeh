@@ -1,0 +1,1930 @@
+```html
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistem Digitalisasi Dusun Ngrombeh - Desa Klopo, Magelang</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Google Fonts: Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        dusun: {
+                            green: '#15803d',
+                            dark: '#14532d',
+                            light: '#dcfce7',
+                            gold: '#eab308',
+                            goldlight: '#fef08a',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Animasi Running Text */
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+        .animate-marquee {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 28s linear infinite;
+        }
+        .animate-marquee:hover {
+            animation-play-state: paused;
+        }
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #15803d;
+            border-radius: 4px;
+        }
+        /* Toggle Switch Styling */
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #15803d;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #15803d;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased">
+
+    <!-- NOTIFIKASI TOAST (Pengganti Alert) -->
+    <div id="toast-container" class="fixed bottom-5 right-5 z-50 flex flex-col gap-2"></div>
+
+    <!-- BANNER MODE DEVELOPER (Tampil jika admin login) -->
+    <div id="dev-banner" class="hidden bg-slate-900 text-white px-4 py-2.5 sticky top-0 z-40 border-b-4 border-yellow-400 shadow-lg">
+        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2">
+            <div class="flex items-center gap-2">
+                <span class="bg-yellow-400 text-slate-900 text-xs font-extrabold px-2.5 py-1 rounded uppercase tracking-wider animate-pulse">
+                    <i class="fa-solid fa-code mr-1"></i> Mode Developer Aktif
+                </span>
+                <span class="text-xs sm:text-sm text-slate-300 hidden sm:inline">Anda memiliki akses penuh pengelolaan data, sensor privasi dinonaktifkan di panel admin.</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <button onclick="switchView('public')" id="btn-view-public" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-600 hover:bg-emerald-500 text-white transition">
+                    <i class="fa-solid fa-eye mr-1"></i> Lihat Display Publik
+                </button>
+                <button onclick="switchView('admin')" id="btn-view-admin" class="hidden px-3 py-1.5 rounded-lg text-xs font-semibold bg-yellow-500 hover:bg-yellow-400 text-slate-900 transition">
+                    <i class="fa-solid fa-sliders mr-1"></i> Panel Developer
+                </button>
+                <button onclick="logoutAdmin()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-red-600 hover:bg-red-500 text-white transition">
+                    <i class="fa-solid fa-right-from-bracket mr-1"></i> Keluar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- RUNNING TEXT PENGUMUMAN -->
+    <div class="bg-yellow-400 text-green-950 font-semibold text-xs sm:text-sm py-2 overflow-hidden border-b border-yellow-500">
+        <div class="max-w-7xl mx-auto flex items-center px-4">
+            <span class="bg-green-800 text-white px-2.5 py-0.5 rounded text-xs font-bold mr-3 shrink-0 shadow-sm">
+                <i class="fa-solid fa-bullhorn mr-1"></i> INFO DUSUN
+            </span>
+            <div class="overflow-hidden w-full">
+                <div id="running-text-content" class="animate-marquee">
+                    Selamat Datang di Portal Digital Dusun Ngrombeh, Desa Klopo, Kec. Tegalrejo, Kab. Magelang • Kerja Bakti Bersih Sendang & Saluran Irigasi dilaksanakan Minggu Kliwon pukul 07.00 WIB • Posyandu Balita & Lansia bertempat di Rumah Bapak Kadus setiap tanggal 12.
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- HEADER UTAMA -->
+    <header class="bg-gradient-to-r from-green-800 via-green-700 to-green-800 text-white shadow-md">
+        <div class="max-w-7xl mx-auto px-4 py-5 sm:py-6">
+            <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                <div class="flex items-center gap-4">
+                    <!-- Logo Perisai / Desa SVG -->
+                    <div class="w-14 h-14 sm:w-16 sm:h-16 bg-white rounded-2xl p-2 flex items-center justify-center shadow-lg border-2 border-yellow-400 shrink-0">
+                        <svg viewBox="0 0 64 64" class="w-full h-full">
+                            <path d="M32 4 L56 14 V32 C56 47 45 57 32 60 C19 57 8 47 8 32 V14 Z" fill="#15803d" stroke="#eab308" stroke-width="3"/>
+                            <path d="M16 42 L26 26 L34 36 L42 22 L48 42 Z" fill="#facc15"/>
+                            <circle cx="32" cy="18" r="4" fill="#ffffff"/>
+                        </svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <span class="bg-yellow-400 text-green-950 text-[10px] sm:text-xs font-extrabold px-2 py-0.5 rounded uppercase tracking-wider">Portal Resmi Digital</span>
+                            <span id="sync-status-badge" class="bg-green-900/80 text-green-200 text-[10px] sm:text-xs px-2 py-0.5 rounded border border-green-600">
+                                <i class="fa-solid fa-database mr-1 text-yellow-400"></i> Penyimpanan Lokal (Siap Sinkron Google Sheets)
+                            </span>
+                        </div>
+                        <h1 class="text-xl sm:text-3xl font-extrabold tracking-tight mt-1 text-white">
+                            DUSUN NGROMBEH
+                        </h1>
+                        <p class="text-xs sm:text-sm text-green-100 font-medium">
+                            Desa Klopo, Kecamatan Tegalrejo, Kabupaten Magelang, Jawa Tengah
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tombol Aksi Header -->
+                <div class="flex items-center gap-2 self-start md:self-center">
+                    <button onclick="syncFromGoogleSheets()" title="Segarkan Data dari Google Sheets" class="px-3.5 py-2.5 bg-green-900/70 hover:bg-green-900 text-white border border-green-500 rounded-xl text-xs sm:text-sm font-semibold transition flex items-center gap-2 shadow-sm">
+                        <i id="sync-icon" class="fa-solid fa-rotate"></i>
+                        <span class="hidden sm:inline">Sinkron Data</span>
+                    </button>
+                    <button id="header-admin-btn" onclick="openLoginModal()" class="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-green-950 rounded-xl text-xs sm:text-sm font-bold transition flex items-center gap-2 shadow-md">
+                        <i class="fa-solid fa-user-shield"></i>
+                        <span>Mode Developer</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Navigasi Cepat (Hanya di Display Publik) -->
+            <nav id="public-nav" class="mt-5 pt-4 border-t border-green-600/60 flex items-center gap-2 overflow-x-auto pb-1 text-xs sm:text-sm font-medium">
+                <a href="#sec-penduduk" class="nav-link-penduduk px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-yellow-400 hover:text-green-950 transition whitespace-nowrap">
+                    <i class="fa-solid fa-users mr-1.5"></i>Statistik & Warga
+                </a>
+                <a href="#sec-kas" class="nav-link-kas px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-yellow-400 hover:text-green-950 transition whitespace-nowrap">
+                    <i class="fa-solid fa-wallet mr-1.5"></i>Kas Dusun
+                </a>
+                <a href="#sec-jadwal" class="nav-link-jadwal px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-yellow-400 hover:text-green-950 transition whitespace-nowrap">
+                    <i class="fa-solid fa-calendar-days mr-1.5"></i>Jadwal Kegiatan
+                </a>
+                <a href="#sec-bansos" class="nav-link-bansos px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-yellow-400 hover:text-green-950 transition whitespace-nowrap">
+                    <i class="fa-solid fa-hand-holding-heart mr-1.5"></i>Penerima Bansos
+                </a>
+                <a href="#sec-berita" class="nav-link-berita px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-yellow-400 hover:text-green-950 transition whitespace-nowrap">
+                    <i class="fa-solid fa-newspaper mr-1.5"></i>Arsip Berita & Kegiatan
+                </a>
+                <a href="#sec-kontak" class="nav-link-kontak px-3.5 py-1.5 rounded-lg bg-white/10 hover:bg-yellow-400 hover:text-green-950 transition whitespace-nowrap">
+                    <i class="fa-solid fa-phone-volume mr-1.5"></i>Kontak & Drive Dusun
+                </a>
+            </nav>
+        </div>
+    </header>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 1: DISPLAY PUBLIK (WARGA - READ ONLY & SENSOR PRIVASI OTOMATIS)  -->
+    <!-- ===================================================================== -->
+    <main id="public-view" class="max-w-7xl mx-auto px-4 py-6 sm:py-8 space-y-10">
+
+        <!-- BAGIAN 1: STATISTIK & DATA PENDUDUK -->
+        <section id="sec-penduduk" class="scroll-mt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-green-900 flex items-center gap-2">
+                        <span class="w-2 h-7 bg-yellow-400 rounded-full inline-block"></span>
+                        Statistik & Direktori Penduduk
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Data kependudukan Dusun Ngrombeh (NIK & Tanggal Lahir disensor demi privasi warga)</p>
+                </div>
+                <span class="text-xs font-semibold bg-green-100 text-green-800 px-3 py-1.5 rounded-lg border border-green-200 self-start">
+                    <i class="fa-solid fa-shield-halved mr-1"></i> Perlindungan Privasi Aktif
+                </span>
+            </div>
+
+            <!-- Kartu Ringkasan Statistik -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-green-600">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-400">Total Penduduk</span>
+                        <div class="w-9 h-9 rounded-xl bg-green-100 text-green-700 flex items-center justify-center">
+                            <i class="fa-solid fa-people-group"></i>
+                        </div>
+                    </div>
+                    <div id="stat-total-jiwa" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2">0</div>
+                    <p class="text-xs text-green-700 font-medium mt-1">Jiwa Terdaftar</p>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-yellow-400">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-400">Kepala Keluarga</span>
+                        <div class="w-9 h-9 rounded-xl bg-yellow-100 text-yellow-700 flex items-center justify-center">
+                            <i class="fa-solid fa-house-user"></i>
+                        </div>
+                    </div>
+                    <div id="stat-total-kk" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2">0</div>
+                    <p class="text-xs text-yellow-700 font-medium mt-1">Kartu Keluarga (KK)</p>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-emerald-500">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-400">Laki-Laki</span>
+                        <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-700 flex items-center justify-center">
+                            <i class="fa-solid fa-person"></i>
+                        </div>
+                    </div>
+                    <div id="stat-laki" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2">0</div>
+                    <p id="stat-laki-pct" class="text-xs text-slate-500 font-medium mt-1">0% dari total</p>
+                </div>
+
+                <div class="bg-white p-4 sm:p-5 rounded-2xl shadow-sm border border-slate-200 border-l-4 border-l-amber-500">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-400">Perempuan</span>
+                        <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-700 flex items-center justify-center">
+                            <i class="fa-solid fa-person-dress"></i>
+                        </div>
+                    </div>
+                    <div id="stat-perempuan" class="text-2xl sm:text-3xl font-extrabold text-slate-800 mt-2">0</div>
+                    <p id="stat-perempuan-pct" class="text-xs text-slate-500 font-medium mt-1">0% dari total</p>
+                </div>
+            </div>
+
+            <!-- Grafik & Tabel Pencarian Warga -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Grafik Distribusi RT -->
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 flex flex-col justify-between">
+                    <div>
+                        <h3 class="font-bold text-slate-800 text-base mb-1">Sebaran Warga per RT</h3>
+                        <p class="text-xs text-slate-500 mb-4">Komposisi warga Dusun Ngrombeh berdasarkan wilayah RT</p>
+                    </div>
+                    <div class="relative h-56 w-full">
+                        <canvas id="chartPenduduk"></canvas>
+                    </div>
+                </div>
+
+                <!-- Tabel Direktori Warga (Tersensor) -->
+                <div class="lg:col-span-2 bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4">
+                        <h3 class="font-bold text-slate-800 text-base">Cek Data Penduduk Dusun</h3>
+                        <div class="flex items-center gap-2">
+                            <select id="public-filter-rt" onchange="renderPublicPenduduk()" class="text-xs sm:text-sm border border-slate-300 rounded-xl px-3 py-2 bg-slate-50 focus:outline-none focus:border-green-600">
+                                <option value="ALL">Semua RT</option>
+                                <option value="RT 01">RT 01</option>
+                                <option value="RT 02">RT 02</option>
+                                <option value="RT 03">RT 03</option>
+                                <option value="RT 04">RT 04</option>
+                            </select>
+                            <div class="relative flex-1 sm:w-56">
+                                <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                                <input type="text" id="public-search-warga" onkeyup="renderPublicPenduduk()" placeholder="Cari nama warga..." class="w-full pl-8 pr-3 py-2 text-xs sm:text-sm border border-slate-300 rounded-xl focus:outline-none focus:border-green-600">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-green-800 text-white">
+                                    <th class="py-3 px-3 font-semibold">Nama Lengkap</th>
+                                    <th class="py-3 px-3 font-semibold">NIK (Disensor)</th>
+                                    <th class="py-3 px-3 font-semibold">Tgl Lahir (Disensor)</th>
+                                    <th class="py-3 px-3 font-semibold">L/P</th>
+                                    <th class="py-3 px-3 font-semibold">Wilayah</th>
+                                    <th class="py-3 px-3 font-semibold">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="public-table-penduduk" class="divide-y divide-slate-200">
+                                <!-- Diisi JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- BAGIAN 2: TRANSPARANSI KAS DUSUN -->
+        <section id="sec-kas" class="scroll-mt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-green-900 flex items-center gap-2">
+                        <span class="w-2 h-7 bg-yellow-400 rounded-full inline-block"></span>
+                        Transparansi Keuangan & Kas Dusun
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Laporan pemasukan dan pengeluaran kas operasional & pembangunan Dusun Ngrombeh</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+                <div class="bg-gradient-to-br from-green-800 to-green-700 text-white p-5 rounded-2xl shadow-md relative overflow-hidden">
+                    <div class="relative z-10">
+                        <span class="text-xs uppercase font-bold text-yellow-300 tracking-wider">Saldo Kas Dusun Saat Ini</span>
+                        <div id="kas-saldo" class="text-2xl sm:text-3xl font-extrabold mt-2">Rp 0</div>
+                        <p class="text-xs text-green-100 mt-2"><i class="fa-solid fa-circle-check text-yellow-400 mr-1"></i> Terverifikasi Bendahara Dusun</p>
+                    </div>
+                    <i class="fa-solid fa-vault absolute -right-4 -bottom-4 text-7xl text-white/10"></i>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-400">Total Pemasukan</span>
+                        <span class="w-8 h-8 rounded-lg bg-emerald-100 text-emerald-700 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-up"></i></span>
+                    </div>
+                    <div id="kas-masuk" class="text-xl sm:text-2xl font-extrabold text-emerald-700 mt-2">Rp 0</div>
+                    <p class="text-xs text-slate-500 mt-1">Iuran warga, swadaya & bantuan desa</p>
+                </div>
+
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold uppercase text-slate-400">Total Pengeluaran</span>
+                        <span class="w-8 h-8 rounded-lg bg-rose-100 text-rose-700 flex items-center justify-center"><i class="fa-solid fa-arrow-trend-down"></i></span>
+                    </div>
+                    <div id="kas-keluar" class="text-xl sm:text-2xl font-extrabold text-rose-600 mt-2">Rp 0</div>
+                    <p class="text-xs text-slate-500 mt-1">Operasional, sosial & infrastruktur dusun</p>
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <h3 class="font-bold text-slate-800 text-base mb-4">Riwayat Mutasi Kas Terbaru</h3>
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-slate-100 text-slate-700 border-b border-slate-200">
+                                <th class="py-3 px-4 font-bold">Tanggal</th>
+                                <th class="py-3 px-4 font-bold">Keterangan Transaksi</th>
+                                <th class="py-3 px-4 font-bold">Kategori</th>
+                                <th class="py-3 px-4 font-bold text-right">Nominal</th>
+                            </tr>
+                        </thead>
+                        <tbody id="public-table-kas" class="divide-y divide-slate-200">
+                            <!-- Diisi JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- BAGIAN 3: JADWAL KEGIATAN DUSUN -->
+        <section id="sec-jadwal" class="scroll-mt-6">
+            <div class="mb-4">
+                <h2 class="text-xl sm:text-2xl font-extrabold text-green-900 flex items-center gap-2">
+                    <span class="w-2 h-7 bg-yellow-400 rounded-full inline-block"></span>
+                    Jadwal Kegiatan & Agenda Dusun
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Agenda rutin warga, kerja bakti, posyandu, rapat RT/RW, dan kegiatan pemuda</p>
+            </div>
+
+            <div id="public-grid-jadwal" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <!-- Diisi JS -->
+            </div>
+        </section>
+
+        <!-- BAGIAN 4: DATA PENERIMA BANSOS (Bisa di On/Off dari Developer) -->
+        <section id="sec-bansos" class="scroll-mt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-green-900 flex items-center gap-2">
+                        <span class="w-2 h-7 bg-yellow-400 rounded-full inline-block"></span>
+                        Transparansi Penerima Bantuan Sosial (Bansos)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Daftar warga penerima manfaat PKH, BPNT, BLT-DD, dan bantuan pangan di Dusun Ngrombeh</p>
+                </div>
+                <div class="relative sm:w-64">
+                    <i class="fa-solid fa-magnifying-glass absolute left-3 top-2.5 text-slate-400 text-xs"></i>
+                    <input type="text" id="public-search-bansos" onkeyup="renderPublicBansos()" placeholder="Cari nama penerima..." class="w-full pl-8 pr-3 py-2 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-green-600">
+                </div>
+            </div>
+
+            <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200">
+                <div class="overflow-x-auto rounded-xl border border-slate-200">
+                    <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                        <thead>
+                            <tr class="bg-green-800 text-white">
+                                <th class="py-3 px-4 font-semibold">No</th>
+                                <th class="py-3 px-4 font-semibold">Nama Penerima Manfaat</th>
+                                <th class="py-3 px-4 font-semibold">Wilayah</th>
+                                <th class="py-3 px-4 font-semibold">Program Bantuan</th>
+                                <th class="py-3 px-4 font-semibold">Periode / Tahun</th>
+                                <th class="py-3 px-4 font-semibold">Status Penyaluran</th>
+                            </tr>
+                        </thead>
+                        <tbody id="public-table-bansos" class="divide-y divide-slate-200">
+                            <!-- Diisi JS -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- BAGIAN 5: ARSIP BERITA & DOKUMENTASI KEGIATAN -->
+        <section id="sec-berita" class="scroll-mt-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
+                <div>
+                    <h2 class="text-xl sm:text-2xl font-extrabold text-green-900 flex items-center gap-2">
+                        <span class="w-2 h-7 bg-yellow-400 rounded-full inline-block"></span>
+                        Arsip Berita & Dokumentasi Kegiatan Dusun
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Rekam jejak pembangunan, gotong royong, dan kabar terbaru Dusun Ngrombeh</p>
+                </div>
+                <select id="public-filter-berita" onchange="renderPublicBerita()" class="text-xs sm:text-sm bg-white border border-slate-300 rounded-xl px-3 py-2 focus:outline-none focus:border-green-600 self-start">
+                    <option value="ALL">Semua Kategori</option>
+                    <option value="Pembangunan">Pembangunan</option>
+                    <option value="Sosial & Budaya">Sosial & Budaya</option>
+                    <option value="Kesehatan">Kesehatan</option>
+                    <option value="Pengumuman">Pengumuman</option>
+                </select>
+            </div>
+
+            <div id="public-grid-berita" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Diisi JS -->
+            </div>
+        </section>
+
+        <!-- BAGIAN 6: INFORMASI PENTING, KONTAK DARURAT & ARSIP GOOGLE DRIVE -->
+        <section id="sec-kontak" class="scroll-mt-6">
+            <div class="mb-4">
+                <h2 class="text-xl sm:text-2xl font-extrabold text-green-900 flex items-center gap-2">
+                    <span class="w-2 h-7 bg-yellow-400 rounded-full inline-block"></span>
+                    Kontak Perangkat Dusun & Arsip Publik Google Drive
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-0.5">Layanan informasi cepat perangkat dusun, keamanan, kesehatan, dan tautan dokumen publik</p>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Kontak Darurat & Perangkat -->
+                <div class="lg:col-span-2 grid grid-cols-1 sm:grid-cols-2 gap-4" id="public-grid-kontak">
+                    <!-- Diisi JS -->
+                </div>
+
+                <!-- Box Google Drive Publik Dusun -->
+                <div class="bg-gradient-to-br from-green-900 to-green-800 text-white p-6 rounded-2xl shadow-md flex flex-col justify-between border-2 border-yellow-400">
+                    <div>
+                        <div class="w-12 h-12 rounded-xl bg-yellow-400 text-green-950 flex items-center justify-center text-2xl mb-4 shadow">
+                            <i class="fa-brands fa-google-drive"></i>
+                        </div>
+                        <h3 class="text-lg font-extrabold text-white">Arsip Digital Google Drive</h3>
+                        <p class="text-xs sm:text-sm text-green-100 mt-2 leading-relaxed">
+                            Akses dokumen publik Dusun Ngrombeh seperti LPJ Kegiatan, Peta Wilayah Dusun, Dokumentasi Foto Resolusi Tinggi, dan Notulensi Rapat Warga.
+                        </p>
+                    </div>
+                    <div class="mt-6 space-y-2.5">
+                        <a id="public-gdrive-link" href="https://drive.google.com" target="_blank" rel="noopener noreferrer" class="w-full py-3 px-4 bg-yellow-400 hover:bg-yellow-300 text-green-950 font-bold rounded-xl text-xs sm:text-sm flex items-center justify-center gap-2 transition shadow">
+                            <i class="fa-solid fa-folder-open"></i> Buka Folder Google Drive Dusun
+                        </a>
+                        <p class="text-[11px] text-center text-green-200">Terhubung langsung dengan Cloud Storage Dusun</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- ===================================================================== -->
+    <!-- VIEW 2: PANEL DEVELOPER / ADMIN (TERPROTEKSI LOGIN)                   -->
+    <!-- ===================================================================== -->
+    <main id="admin-view" class="hidden max-w-7xl mx-auto px-4 py-6 sm:py-8 space-y-6">
+        
+        <!-- Header Panel Developer -->
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border border-slate-200 flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h2 class="text-xl sm:text-2xl font-extrabold text-slate-900 flex items-center gap-2">
+                    <i class="fa-solid fa-sliders text-green-700"></i>
+                    Panel Kontrol Developer & Perangkat Dusun
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">
+                    Kelola seluruh database Dusun Ngrombeh, atur visibilitas tampilan warga, dan sinkronkan ke Google Sheets & Google Drive.
+                </p>
+            </div>
+            <div class="flex flex-wrap items-center gap-2">
+                <button onclick="resetDemoData()" class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold transition">
+                    <i class="fa-solid fa-rotate-left mr-1"></i> Reset Data Contoh
+                </button>
+                <button onclick="pushAllToGoogleSheets()" class="px-4 py-2 bg-green-700 hover:bg-green-800 text-white rounded-xl text-xs font-bold transition shadow-sm">
+                    <i class="fa-solid fa-cloud-arrow-up mr-1"></i> Simpan & Kirim ke Google Sheets
+                </button>
+            </div>
+        </div>
+
+        <!-- KONTROL VISIBILITAS DISPLAY PUBLIK (SAKELAR ON/OFF) -->
+        <div class="bg-white p-5 sm:p-6 rounded-2xl shadow-sm border-2 border-yellow-400">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h3 class="text-base sm:text-lg font-extrabold text-green-900 flex items-center gap-2">
+                        <i class="fa-solid fa-eye-slash text-yellow-600"></i>
+                        Pengaturan Visibilitas Display Publik (Sakelar On/Off)
+                    </h3>
+                    <p class="text-xs text-slate-500">Tentukan bagian informasi mana saja yang boleh dilihat oleh warga pada tampilan publik secara real-time.</p>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+                <!-- Toggle 1: Penduduk -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-green-50/50 cursor-pointer transition">
+                    <div>
+                        <div class="font-bold text-sm text-slate-800">Statistik & Data Penduduk</div>
+                        <div class="text-[11px] text-slate-500">NIK & Tgl Lahir otomatis disensor</div>
+                    </div>
+                    <input type="checkbox" id="vis-penduduk" onchange="updateVisibilitySetting('penduduk', this.checked)" class="w-5 h-5 accent-green-700 rounded cursor-pointer" checked>
+                </label>
+
+                <!-- Toggle 2: Kas Dusun -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-green-50/50 cursor-pointer transition">
+                    <div>
+                        <div class="font-bold text-sm text-slate-800">Transparansi Kas Dusun</div>
+                        <div class="text-[11px] text-slate-500">Saldo & mutasi keuangan dusun</div>
+                    </div>
+                    <input type="checkbox" id="vis-kas" onchange="updateVisibilitySetting('kas', this.checked)" class="w-5 h-5 accent-green-700 rounded cursor-pointer" checked>
+                </label>
+
+                <!-- Toggle 3: Jadwal Kegiatan -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-green-50/50 cursor-pointer transition">
+                    <div>
+                        <div class="font-bold text-sm text-slate-800">Jadwal Kegiatan Dusun</div>
+                        <div class="text-[11px] text-slate-500">Agenda ronda, kerja bakti, posyandu</div>
+                    </div>
+                    <input type="checkbox" id="vis-jadwal" onchange="updateVisibilitySetting('jadwal', this.checked)" class="w-5 h-5 accent-green-700 rounded cursor-pointer" checked>
+                </label>
+
+                <!-- Toggle 4: Bansos (Fleksibel ditiadakan) -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl border-2 border-yellow-300 bg-yellow-50/60 hover:bg-yellow-50 cursor-pointer transition">
+                    <div>
+                        <div class="font-bold text-sm text-slate-900">Data Penerima Bansos</div>
+                        <div class="text-[11px] text-amber-700 font-medium">Bisa disembunyikan sewaktu-waktu</div>
+                    </div>
+                    <input type="checkbox" id="vis-bansos" onchange="updateVisibilitySetting('bansos', this.checked)" class="w-5 h-5 accent-green-700 rounded cursor-pointer" checked>
+                </label>
+
+                <!-- Toggle 5: Berita & Arsip -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-green-50/50 cursor-pointer transition">
+                    <div>
+                        <div class="font-bold text-sm text-slate-800">Arsip Berita & Dokumentasi</div>
+                        <div class="text-[11px] text-slate-500">Artikel & foto kegiatan dusun</div>
+                    </div>
+                    <input type="checkbox" id="vis-berita" onchange="updateVisibilitySetting('berita', this.checked)" class="w-5 h-5 accent-green-700 rounded cursor-pointer" checked>
+                </label>
+
+                <!-- Toggle 6: Kontak & Drive -->
+                <label class="flex items-center justify-between p-3.5 rounded-xl border border-slate-200 bg-slate-50 hover:bg-green-50/50 cursor-pointer transition">
+                    <div>
+                        <div class="font-bold text-sm text-slate-800">Kontak & Folder Google Drive</div>
+                        <div class="text-[11px] text-slate-500">Nomor perangkat & tautan dokumen</div>
+                    </div>
+                    <input type="checkbox" id="vis-kontak" onchange="updateVisibilitySetting('kontak', this.checked)" class="w-5 h-5 accent-green-700 rounded cursor-pointer" checked>
+                </label>
+            </div>
+        </div>
+
+        <!-- TAB NAVIGASI MODUL ADMIN -->
+        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+            <div class="flex overflow-x-auto border-b border-slate-200 bg-slate-50 px-2 pt-2 gap-1 text-xs sm:text-sm font-bold">
+                <button onclick="switchAdminTab('tab-penduduk')" id="btn-tab-penduduk" class="admin-tab-btn px-4 py-3 rounded-t-xl bg-white text-green-800 border-t-2 border-x border-green-700">
+                    <i class="fa-solid fa-users mr-1.5"></i>Data Penduduk (Full NIK)
+                </button>
+                <button onclick="switchAdminTab('tab-kas')" id="btn-tab-kas" class="admin-tab-btn px-4 py-3 rounded-t-xl text-slate-600 hover:text-green-800">
+                    <i class="fa-solid fa-wallet mr-1.5"></i>Kas Dusun
+                </button>
+                <button onclick="switchAdminTab('tab-jadwal')" id="btn-tab-jadwal" class="admin-tab-btn px-4 py-3 rounded-t-xl text-slate-600 hover:text-green-800">
+                    <i class="fa-solid fa-calendar-days mr-1.5"></i>Jadwal Kegiatan
+                </button>
+                <button onclick="switchAdminTab('tab-bansos')" id="btn-tab-bansos" class="admin-tab-btn px-4 py-3 rounded-t-xl text-slate-600 hover:text-green-800">
+                    <i class="fa-solid fa-hand-holding-heart mr-1.5"></i>Penerima Bansos
+                </button>
+                <button onclick="switchAdminTab('tab-berita')" id="btn-tab-berita" class="admin-tab-btn px-4 py-3 rounded-t-xl text-slate-600 hover:text-green-800">
+                    <i class="fa-solid fa-newspaper mr-1.5"></i>Arsip Berita & Foto
+                </button>
+                <button onclick="switchAdminTab('tab-integrasi')" id="btn-tab-integrasi" class="admin-tab-btn px-4 py-3 rounded-t-xl text-amber-700 hover:text-amber-800">
+                    <i class="fa-brands fa-google mr-1.5"></i>Integrasi Sheets & Drive
+                </button>
+            </div>
+
+            <div class="p-5 sm:p-6">
+                <!-- TAB 1: KELOLA PENDUDUK -->
+                <div id="tab-penduduk" class="admin-tab-content space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-base">Database Penduduk Dusun Ngrombeh (Akses Penuh Tanpa Sensor)</h4>
+                            <p class="text-xs text-slate-500">NIK dan Tanggal Lahir ditampilkan utuh khusus di Mode Developer.</p>
+                        </div>
+                        <button onclick="openModalPenduduk()" class="px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded-xl text-xs font-bold shadow-sm self-start">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Warga Baru
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="py-3 px-3">NIK (Asli)</th>
+                                    <th class="py-3 px-3">Nama Lengkap</th>
+                                    <th class="py-3 px-3">Tgl Lahir (Asli)</th>
+                                    <th class="py-3 px-3">L/P</th>
+                                    <th class="py-3 px-3">RT</th>
+                                    <th class="py-3 px-3">Status</th>
+                                    <th class="py-3 px-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-penduduk" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 2: KELOLA KAS DUSUN -->
+                <div id="tab-kas" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-base">Kelola Transaksi Kas Dusun</h4>
+                            <p class="text-xs text-slate-500">Catat pemasukan atau pengeluaran kas dusun secara transparan.</p>
+                        </div>
+                        <button onclick="openModalKas()" class="px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded-xl text-xs font-bold shadow-sm self-start">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Transaksi Kas
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="py-3 px-3">Tanggal</th>
+                                    <th class="py-3 px-3">Keterangan</th>
+                                    <th class="py-3 px-3">Jenis</th>
+                                    <th class="py-3 px-3 text-right">Nominal (Rp)</th>
+                                    <th class="py-3 px-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-kas" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 3: KELOLA JADWAL KEGIATAN -->
+                <div id="tab-jadwal" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-base">Kelola Jadwal & Agenda Kegiatan Dusun</h4>
+                            <p class="text-xs text-slate-500">Tambahkan jadwal ronda, kerja bakti, rapat dusun, atau posyandu.</p>
+                        </div>
+                        <button onclick="openModalJadwal()" class="px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded-xl text-xs font-bold shadow-sm self-start">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Agenda
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="py-3 px-3">Tanggal & Waktu</th>
+                                    <th class="py-3 px-3">Nama Kegiatan</th>
+                                    <th class="py-3 px-3">Lokasi</th>
+                                    <th class="py-3 px-3">Peserta / Sasaran</th>
+                                    <th class="py-3 px-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-jadwal" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 4: KELOLA PENERIMA BANSOS -->
+                <div id="tab-bansos" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-base">Kelola Daftar Penerima Bansos</h4>
+                            <p class="text-xs text-slate-500">Gunakan sakelar visibilitas di atas jika bagian ini ingin disembunyikan sementara dari publik.</p>
+                        </div>
+                        <button onclick="openModalBansos()" class="px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded-xl text-xs font-bold shadow-sm self-start">
+                            <i class="fa-solid fa-plus mr-1"></i> Tambah Penerima Bansos
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="py-3 px-3">Nama Penerima</th>
+                                    <th class="py-3 px-3">RT</th>
+                                    <th class="py-3 px-3">Jenis Bantuan</th>
+                                    <th class="py-3 px-3">Periode</th>
+                                    <th class="py-3 px-3">Status</th>
+                                    <th class="py-3 px-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-bansos" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 5: KELOLA ARSIP BERITA & KEGIATAN -->
+                <div id="tab-berita" class="admin-tab-content hidden space-y-4">
+                    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                        <div>
+                            <h4 class="font-extrabold text-slate-800 text-base">Kelola Arsip Berita & Dokumentasi Kegiatan</h4>
+                            <p class="text-xs text-slate-500">Mendukung link gambar langsung maupun tautan share file dari Google Drive.</p>
+                        </div>
+                        <button onclick="openModalBerita()" class="px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white rounded-xl text-xs font-bold shadow-sm self-start">
+                            <i class="fa-solid fa-plus mr-1"></i> Tulis Berita / Dokumentasi
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto rounded-xl border border-slate-200">
+                        <table class="w-full text-left border-collapse text-xs sm:text-sm">
+                            <thead>
+                                <tr class="bg-slate-800 text-white">
+                                    <th class="py-3 px-3">Tanggal</th>
+                                    <th class="py-3 px-3">Judul Kegiatan / Berita</th>
+                                    <th class="py-3 px-3">Kategori</th>
+                                    <th class="py-3 px-3">Link Foto / Drive</th>
+                                    <th class="py-3 px-3 text-center">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="admin-table-berita" class="divide-y divide-slate-200"></tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- TAB 6: INTEGRASI GOOGLE SHEETS & GOOGLE DRIVE -->
+                <div id="tab-integrasi" class="admin-tab-content hidden space-y-6">
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Form Konfigurasi API & Drive -->
+                        <div class="space-y-4 bg-slate-50 p-5 rounded-2xl border border-slate-200">
+                            <h4 class="font-extrabold text-green-900 text-base flex items-center gap-2">
+                                <i class="fa-solid fa-plug text-green-700"></i>
+                                Konfigurasi Koneksi Google Spreadsheets & Drive
+                            </h4>
+                            <p class="text-xs text-slate-600 leading-relaxed">
+                                Masukkan URL Web App dari <strong>Google Apps Script</strong> agar website ini membaca dan menulis data langsung ke Google Sheets milik Dusun Ngrombeh.
+                            </p>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">URL Web App Google Apps Script (API Endpoint)</label>
+                                <input type="url" id="cfg-gas-url" placeholder="https://script.google.com/macros/s/AKfycb.../exec" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-green-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Link Folder Publik Google Drive Dusun</label>
+                                <input type="url" id="cfg-gdrive-folder" placeholder="https://drive.google.com/drive/folders/..." class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-green-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Teks Pengumuman Kilat (Running Text)</label>
+                                <input type="text" id="cfg-running-text" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-green-600">
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Ubah PIN / Password Developer</label>
+                                <input type="text" id="cfg-admin-pin" class="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white border border-slate-300 rounded-xl focus:outline-none focus:border-green-600">
+                            </div>
+
+                            <div class="flex flex-wrap gap-2 pt-2">
+                                <button onclick="saveIntegrationConfig()" class="px-4 py-2.5 bg-green-700 hover:bg-green-800 text-white font-bold rounded-xl text-xs transition shadow">
+                                    <i class="fa-solid fa-floppy-disk mr-1"></i> Simpan Konfigurasi
+                                </button>
+                                <button onclick="testGoogleSheetsConnection()" class="px-4 py-2.5 bg-yellow-400 hover:bg-yellow-300 text-green-950 font-bold rounded-xl text-xs transition shadow">
+                                    <i class="fa-solid fa-vial mr-1"></i> Test Koneksi & Tarik Data
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Panduan & Salin Kode Google Apps Script -->
+                        <div class="space-y-4 bg-slate-900 text-slate-100 p-5 rounded-2xl">
+                            <div class="flex items-center justify-between">
+                                <h4 class="font-extrabold text-yellow-400 text-sm sm:text-base">
+                                    <i class="fa-solid fa-code mr-1.5"></i> Skrip Penghubung Google Sheets (Code.gs)
+                                </h4>
+                                <button onclick="copyGasScript()" class="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-bold rounded-lg transition">
+                                    <i class="fa-regular fa-copy mr-1"></i> Salin Kode
+                                </button>
+                            </div>
+                            <ol class="text-xs text-slate-300 list-decimal list-inside space-y-1">
+                                <li>Buat Google Spreadsheet baru bernama <strong>Database Dusun Ngrombeh</strong>.</li>
+                                <li>Klik menu <strong>Ekstensi &gt; Apps Script</strong>, lalu tempel kode di bawah ini.</li>
+                                <li>Klik <strong>Terapkan (Deploy) &gt; Deployment Baru &gt; Aplikasi Web</strong>.</li>
+                                <li>Setel akses ke <strong>"Siapa saja (Anyone)"</strong>, salin URL Web App-nya ke form di samping.</li>
+                            </ol>
+                            <textarea id="gas-script-code" readonly rows="11" class="w-full bg-slate-950 text-emerald-400 font-mono text-[11px] p-3 rounded-xl border border-slate-700 focus:outline-none">function doGet(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('DatabaseJSON') || ss.insertSheet('DatabaseJSON');
+  var raw = sheet.getRange('A1').getValue();
+  if (!raw) {
+    return ContentService.createTextOutput(JSON.stringify({ status: 'empty' }))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+  return ContentService.createTextOutput(raw)
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function doPost(e) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var payload = JSON.parse(e.postData.contents);
+  
+  // 1. Simpan Backup JSON lengkap untuk sinkronisasi cepat website
+  var jsonSheet = ss.getSheetByName('DatabaseJSON') || ss.insertSheet('DatabaseJSON');
+  jsonSheet.getRange('A1').setValue(JSON.stringify(payload));
+  jsonSheet.getRange('A2').setValue('Terakhir disinkronkan: ' + new Date());
+
+  // 2. Tuliskan ke Sheet terpisah agar mudah dibaca perangkat dusun
+  syncTableToSheet(ss, 'Penduduk', ['id','nik','nama','tglLahir','jk','rt','status'], payload.penduduk);
+  syncTableToSheet(ss, 'KasDusun', ['id','tanggal','keterangan','jenis','nominal'], payload.kas);
+  syncTableToSheet(ss, 'Jadwal', ['id','tanggal','waktu','judul','lokasi','sasaran'], payload.jadwal);
+  syncTableToSheet(ss, 'Bansos', ['id','nama','rt','program','periode','status'], payload.bansos);
+  syncTableToSheet(ss, 'Berita', ['id','tanggal','judul','kategori','ringkasan','isi','gambar'], payload.berita);
+
+  return ContentService.createTextOutput(JSON.stringify({ status: 'success' }))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+
+function syncTableToSheet(ss, name, headers, rows) {
+  var sheet = ss.getSheetByName(name) || ss.insertSheet(name);
+  sheet.clear();
+  sheet.appendRow(headers);
+  if (rows && rows.length > 0) {
+    var values = rows.map(function(r) {
+      return headers.map(function(h) { return r[h] || ''; });
+    });
+    sheet.getRange(2, 1, values.length, headers.length).setValues(values);
+  }
+}</textarea>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="bg-green-950 text-green-200 mt-12 border-t-4 border-yellow-400">
+        <div class="max-w-7xl mx-auto px-4 py-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs sm:text-sm">
+            <div class="text-center sm:text-left">
+                <p class="font-bold text-white text-base">Pemerintah Dusun Ngrombeh</p>
+                <p class="text-green-300 mt-0.5">Desa Klopo, Kecamatan Tegalrejo, Kabupaten Magelang, Jawa Tengah</p>
+            </div>
+            <div class="text-center sm:text-right text-xs text-green-400">
+                <p>&copy; 2026 Sistem Digitalisasi Dusun Ngrombeh.</p>
+                <p>Terintegrasi Google Sheets & Google Drive Cloud.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL LOGIN DEVELOPER / ADMIN                                         -->
+    <!-- ===================================================================== -->
+    <div id="modal-login" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-2xl overflow-hidden border border-slate-200">
+            <div class="bg-green-800 text-white p-5 flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                    <i class="fa-solid fa-user-shield text-yellow-400 text-xl"></i>
+                    <h3 class="font-extrabold text-base sm:text-lg">Login Mode Developer</h3>
+                </div>
+                <button onclick="closeModal('modal-login')" class="text-green-200 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <form onsubmit="handleAdminLogin(event)" class="p-6 space-y-4">
+                <p class="text-xs sm:text-sm text-slate-600">
+                    Masukkan PIN / Kata Sandi Perangkat Dusun untuk mengakses kontrol visibilitas, data asli warga, dan sinkronisasi Google Sheets.
+                </p>
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">PIN / Password Developer</label>
+                    <input type="password" id="login-pin-input" required placeholder="Masukkan PIN..." class="w-full px-4 py-3 border border-slate-300 rounded-xl text-sm focus:outline-none focus:border-green-700">
+                    <p class="text-[11px] text-emerald-700 mt-1.5 font-medium">
+                        <i class="fa-solid fa-circle-info mr-1"></i> PIN Default Demo: <code class="bg-emerald-50 px-1.5 py-0.5 rounded border border-emerald-200 font-bold">ngrombeh2026</code>
+                    </p>
+                </div>
+                <div class="flex justify-end gap-2 pt-2">
+                    <button type="button" onclick="closeModal('modal-login')" class="px-4 py-2.5 rounded-xl text-xs font-bold text-slate-600 hover:bg-slate-100">Batal</button>
+                    <button type="submit" class="px-5 py-2.5 rounded-xl text-xs font-bold bg-green-700 hover:bg-green-800 text-white shadow">Masuk ke Panel</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL BACA ARTIKEL BERITA LENGKAP                                     -->
+    <!-- ===================================================================== -->
+    <div id="modal-baca-berita" class="hidden fixed inset-0 z-50 bg-slate-900/75 backdrop-blur-sm flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-2xl max-h-[90vh] rounded-2xl shadow-2xl overflow-hidden flex flex-col">
+            <div class="relative h-56 sm:h-64 bg-slate-200 shrink-0">
+                <img id="read-berita-img" src="" alt="Dokumentasi" class="w-full h-full object-cover">
+                <button onclick="closeModal('modal-baca-berita')" class="absolute top-3 right-3 w-9 h-9 rounded-full bg-slate-900/70 text-white hover:bg-slate-900 flex items-center justify-center">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+                <span id="read-berita-kat" class="absolute bottom-3 left-4 bg-yellow-400 text-green-950 text-xs font-extrabold px-3 py-1 rounded-lg shadow">Kategori</span>
+            </div>
+            <div class="p-6 overflow-y-auto space-y-3">
+                <div id="read-berita-tgl" class="text-xs font-semibold text-green-700"></div>
+                <h3 id="read-berita-judul" class="text-xl sm:text-2xl font-extrabold text-slate-900"></h3>
+                <div id="read-berita-isi" class="text-sm text-slate-700 leading-relaxed whitespace-pre-line pt-2 border-t border-slate-100"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CRUD: PENDUDUK                                                  -->
+    <!-- ===================================================================== -->
+    <div id="modal-form-penduduk" class="hidden fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-green-800 text-white px-5 py-4 flex justify-between items-center">
+                <h3 id="title-modal-penduduk" class="font-bold text-base">Tambah Data Penduduk</h3>
+                <button onclick="closeModal('modal-form-penduduk')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="savePenduduk(event)" class="p-5 space-y-3 text-xs sm:text-sm">
+                <input type="hidden" id="edit-penduduk-id">
+                <div>
+                    <label class="block font-bold mb-1">NIK (16 Digit)</label>
+                    <input type="text" id="inp-nik" required maxlength="16" placeholder="330809..." class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Nama Lengkap</label>
+                    <input type="text" id="inp-nama" required placeholder="Contoh: Slamet Riyadi" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Tanggal Lahir</label>
+                        <input type="date" id="inp-tgllahir" required class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Jenis Kelamin</label>
+                        <select id="inp-jk" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="L">Laki-Laki (L)</option>
+                            <option value="P">Perempuan (P)</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Wilayah RT</label>
+                        <select id="inp-rt" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="RT 01">RT 01</option>
+                            <option value="RT 02">RT 02</option>
+                            <option value="RT 03">RT 03</option>
+                            <option value="RT 04">RT 04</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Status dalam KK</label>
+                        <select id="inp-status-kk" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="Kepala Keluarga">Kepala Keluarga</option>
+                            <option value="Istri">Istri</option>
+                            <option value="Anak">Anak</option>
+                            <option value="Famili Lain">Famili Lain</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('modal-form-penduduk')" class="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-green-700 text-white font-bold">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CRUD: KAS DUSUN                                                 -->
+    <!-- ===================================================================== -->
+    <div id="modal-form-kas" class="hidden fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-green-800 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Tambah Transaksi Kas Dusun</h3>
+                <button onclick="closeModal('modal-form-kas')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveKas(event)" class="p-5 space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-bold mb-1">Tanggal Transaksi</label>
+                    <input type="date" id="inp-kas-tgl" required class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Keterangan</label>
+                    <input type="text" id="inp-kas-ket" required placeholder="Contoh: Iuran Kas Bulanan RT 01" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Jenis Transaksi</label>
+                        <select id="inp-kas-jenis" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="Pemasukan">Pemasukan (+)</option>
+                            <option value="Pengeluaran">Pengeluaran (-)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Nominal (Rp)</label>
+                        <input type="number" id="inp-kas-nominal" required min="100" placeholder="500000" class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('modal-form-kas')" class="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-green-700 text-white font-bold">Simpan Kas</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CRUD: JADWAL KEGIATAN                                           -->
+    <!-- ===================================================================== -->
+    <div id="modal-form-jadwal" class="hidden fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-green-800 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Tambah Jadwal Kegiatan Dusun</h3>
+                <button onclick="closeModal('modal-form-jadwal')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveJadwal(event)" class="p-5 space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-bold mb-1">Nama Kegiatan</label>
+                    <input type="text" id="inp-jad-judul" required placeholder="Contoh: Kerja Bakti Bersih Makam" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Tanggal</label>
+                        <input type="date" id="inp-jad-tgl" required class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Waktu</label>
+                        <input type="text" id="inp-jad-waktu" required placeholder="07.00 WIB - Selesai" class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Lokasi</label>
+                    <input type="text" id="inp-jad-lokasi" required placeholder="Balai Dusun Ngrombeh" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Sasaran / Peserta</label>
+                    <input type="text" id="inp-jad-sasaran" required placeholder="Seluruh Warga RT 01 - RT 04" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('modal-form-jadwal')" class="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-green-700 text-white font-bold">Simpan Jadwal</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CRUD: PENERIMA BANSOS                                           -->
+    <!-- ===================================================================== -->
+    <div id="modal-form-bansos" class="hidden fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-md rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-green-800 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Tambah Penerima Bansos</h3>
+                <button onclick="closeModal('modal-form-bansos')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveBansos(event)" class="p-5 space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-bold mb-1">Nama Penerima Manfaat</label>
+                    <input type="text" id="inp-ban-nama" required placeholder="Nama Warga" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Wilayah RT</label>
+                        <select id="inp-ban-rt" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="RT 01">RT 01</option>
+                            <option value="RT 02">RT 02</option>
+                            <option value="RT 03">RT 03</option>
+                            <option value="RT 04">RT 04</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Program Bansos</label>
+                        <select id="inp-ban-prog" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="PKH (Program Keluarga Harapan)">PKH</option>
+                            <option value="BPNT / Sembako">BPNT / Sembako</option>
+                            <option value="BLT Dana Desa">BLT Dana Desa</option>
+                            <option value="Bantuan Beras Bulog">Bantuan Beras Bulog</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Periode</label>
+                        <input type="text" id="inp-ban-periode" required value="Tahap IV - 2026" class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Status</label>
+                        <select id="inp-ban-status" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="Tersalurkan">Tersalurkan</option>
+                            <option value="Proses Verifikasi">Proses Verifikasi</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('modal-form-bansos')" class="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-green-700 text-white font-bold">Simpan Data</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- MODAL CRUD: BERITA & DOKUMENTASI                                      -->
+    <!-- ===================================================================== -->
+    <div id="modal-form-berita" class="hidden fixed inset-0 z-50 bg-slate-900/70 flex items-center justify-center p-4">
+        <div class="bg-white w-full max-w-lg rounded-2xl shadow-xl overflow-hidden">
+            <div class="bg-green-800 text-white px-5 py-4 flex justify-between items-center">
+                <h3 class="font-bold text-base">Tambah Arsip Berita / Dokumentasi Dusun</h3>
+                <button onclick="closeModal('modal-form-berita')"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form onsubmit="saveBerita(event)" class="p-5 space-y-3 text-xs sm:text-sm">
+                <div>
+                    <label class="block font-bold mb-1">Judul Berita / Kegiatan</label>
+                    <input type="text" id="inp-ber-judul" required placeholder="Contoh: Perbaikan Jalan Setapak RT 02 Dusun Ngrombeh" class="w-full px-3 py-2 border rounded-xl">
+                </div>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="block font-bold mb-1">Tanggal</label>
+                        <input type="date" id="inp-ber-tgl" required class="w-full px-3 py-2 border rounded-xl">
+                    </div>
+                    <div>
+                        <label class="block font-bold mb-1">Kategori</label>
+                        <select id="inp-ber-kat" class="w-full px-3 py-2 border rounded-xl">
+                            <option value="Pembangunan">Pembangunan</option>
+                            <option value="Sosial & Budaya">Sosial & Budaya</option>
+                            <option value="Kesehatan">Kesehatan</option>
+                            <option value="Pengumuman">Pengumuman</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Link Foto (URL Gambar atau Link Share Google Drive)</label>
+                    <input type="url" id="inp-ber-img" placeholder="https://drive.google.com/file/d/.../view" class="w-full px-3 py-2 border rounded-xl">
+                    <p class="text-[11px] text-slate-500 mt-1">Otomatis mengonversi link file Google Drive menjadi pratinjau foto.</p>
+                </div>
+                <div>
+                    <label class="block font-bold mb-1">Isi Laporan / Artikel Lengkap</label>
+                    <textarea id="inp-ber-isi" rows="4" required placeholder="Tuliskan detail jalannya kegiatan dusun..." class="w-full px-3 py-2 border rounded-xl"></textarea>
+                </div>
+                <div class="flex justify-end gap-2 pt-3">
+                    <button type="button" onclick="closeModal('modal-form-berita')" class="px-4 py-2 rounded-xl bg-slate-100 font-bold">Batal</button>
+                    <button type="submit" class="px-4 py-2 rounded-xl bg-green-700 text-white font-bold">Publikasikan</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- ===================================================================== -->
+    <!-- JAVASCRIPT LOGIKA APLIKASI & INTEGRASI GOOGLE SHEETS                  -->
+    <!-- ===================================================================== -->
+    <script>
+        // --- 1. DATA DEFAULT REALISTIS DUSUN NGROMBEH, DESA KLOPO, TEGALREJO, MAGELANG ---
+        const DEFAULT_STATE = {
+            config: {
+                gasUrl: '',
+                gdriveFolder: 'https://drive.google.com',
+                runningText: 'Selamat Datang di Portal Digital Dusun Ngrombeh, Desa Klopo, Kec. Tegalrejo, Kab. Magelang • Kerja Bakti Bersih Sendang & Saluran Irigasi dilaksanakan Minggu Kliwon pukul 07.00 WIB • Posyandu Balita & Lansia bertempat di Rumah Bapak Kadus setiap tanggal 12.',
+                adminPin: 'ngrombeh2026'
+            },
+            visibility: {
+                penduduk: true,
+                kas: true,
+                jadwal: true,
+                bansos: true,
+                berita: true,
+                kontak: true
+            },
+            penduduk: [
+                { id: 'P1', nik: '3308091204780001', nama: 'Budi Santoso', tglLahir: '1978-04-12', jk: 'L', rt: 'RT 01', status: 'Kepala Keluarga' },
+                { id: 'P2', nik: '3308095508820002', nama: 'Siti Aminah', tglLahir: '1982-08-15', jk: 'P', rt: 'RT 01', status: 'Istri' },
+                { id: 'P3', nik: '3308090311690001', nama: 'H. Ahmad Muhajir', tglLahir: '1969-11-03', jk: 'L', rt: 'RT 02', status: 'Kepala Keluarga' },
+                { id: 'P4', nik: '3308094402750003', nama: 'Sri Wahyuni', tglLahir: '1975-02-04', jk: 'P', rt: 'RT 02', status: 'Istri' },
+                { id: 'P5', nik: '3308092107850004', nama: 'Eko Prasetyo', tglLahir: '1985-07-21', jk: 'L', rt: 'RT 03', status: 'Kepala Keluarga' },
+                { id: 'P6', nik: '3308096209900001', nama: 'Nurul Hidayah', tglLahir: '1990-09-22', jk: 'P', rt: 'RT 03', status: 'Istri' },
+                { id: 'P7', nik: '3308091005600002', nama: 'Mbah Kromo Wijoyo', tglLahir: '1960-05-10', jk: 'L', rt: 'RT 04', status: 'Kepala Keluarga' },
+                { id: 'P8', nik: '3308094812640001', nama: 'Mbah Tugiyem', tglLahir: '1964-12-08', jk: 'P', rt: 'RT 04', status: 'Istri' },
+                { id: 'P9', nik: '3308091506020003', nama: 'Dimas Aditya Putra', tglLahir: '2002-06-15', jk: 'L', rt: 'RT 01', status: 'Anak' },
+                { id: 'P10', nik: '3308095003050002', nama: 'Aulia Rahmawati', tglLahir: '2005-03-10', jk: 'P', rt: 'RT 02', status: 'Anak' }
+            ],
+            kas: [
+                { id: 'K1', tanggal: '2026-10-01', keterangan: 'Saldo Awal Kas Dusun Ngrombeh', jenis: 'Pemasukan', nominal: 8500000 },
+                { id: 'K2', tanggal: '2026-10-15', keterangan: 'Iuran Swadaya Warga RT 01 - RT 04', jenis: 'Pemasukan', nominal: 2400000 },
+                { id: 'K3', tanggal: '2026-10-22', keterangan: 'Pembelian Lampu Penerangan Jalan Umum (PJU) Gang Melati', jenis: 'Pengeluaran', nominal: 1350000 },
+                { id: 'K4', tanggal: '2026-11-04', keterangan: 'Konsumsi Kerja Bakti Saluran Irigasi Dusun', jenis: 'Pengeluaran', nominal: 650000 },
+                { id: 'K5', tanggal: '2026-11-10', keterangan: 'Donasi Kas dari Pemuda Karang Taruna Ngrombeh', jenis: 'Pemasukan', nominal: 1200000 }
+            ],
+            jadwal: [
+                { id: 'J1', tanggal: '2026-11-22', waktu: '07.00 WIB - Selesai', judul: 'Kerja Bakti & Bersih Sendang Dusun', lokasi: 'Area Sendang & Jalan Utama Ngrombeh', sasaran: 'Seluruh Kepala Keluarga RT 01 - RT 04' },
+                { id: 'J2', tanggal: '2026-11-25', waktu: '19.30 WIB - Selesai', judul: 'Rapat Koordinasi Ketua RT & Pemuda', lokasi: 'Kediaman Bapak Kadus Ngrombeh', sasaran: 'Pengurus RT, RW, dan Karang Taruna' },
+                { id: 'J3', tanggal: '2026-12-12', waktu: '09.00 WIB - 11.30 WIB', judul: 'Posyandu Balita, Ibu Hamil & Lansia', lokasi: 'Pos Kesehatan Dusun Ngrombeh', sasaran: 'Balita, Ibu Hamil, & Warga Lansia' }
+            ],
+            bansos: [
+                { id: 'B1', nama: 'Mbah Kromo Wijoyo', rt: 'RT 04', program: 'BLT Dana Desa', periode: 'Tahap IV - 2026', status: 'Tersalurkan' },
+                { id: 'B2', nama: 'Sri Wahyuni', rt: 'RT 02', program: 'PKH (Program Keluarga Harapan)', periode: 'Tahap IV - 2026', status: 'Tersalurkan' },
+                { id: 'B3', nama: 'Siti Aminah', rt: 'RT 01', program: 'BPNT / Sembako', periode: 'November 2026', status: 'Tersalurkan' },
+                { id: 'B4', nama: 'Mbah Tugiyem', rt: 'RT 04', program: 'Bantuan Beras Bulog', periode: 'November 2026', status: 'Proses Verifikasi' }
+            ],
+            berita: [
+                {
+                    id: 'N1',
+                    tanggal: '2026-11-08',
+                    judul: 'Gotong Royong Pengecoran Jalan Lingkungan RT 02 Dusun Ngrombeh',
+                    kategori: 'Pembangunan',
+                    gambar: 'https://placehold.co/800x450/15803d/ffffff?text=Gotong+Royong+Dusun+Ngrombeh',
+                    isi: 'Warga Dusun Ngrombeh, Desa Klopo, Kecamatan Tegalrejo melaksanakan kegiatan gotong royong pengecoran jalan lingkungan sepanjang 120 meter di wilayah RT 02.\n\nKegiatan ini melibatkan seluruh warga mulai pukul 07.00 WIB hingga sore hari dengan penuh semangat kebersamaan. Pembangunan ini diharapkan memperlancar akses pertanian dan mobilitas warga sehari-hari.'
+                },
+                {
+                    id: 'N2',
+                    tanggal: '2026-10-28',
+                    judul: 'Pelayanan Posyandu Rutin dan Pemberian Makanan Tambahan (PMT)',
+                    kategori: 'Kesehatan',
+                    gambar: 'https://placehold.co/800x450/eab308/14532d?text=Posyandu+Dusun+Ngrombeh',
+                    isi: 'Kader Posyandu Dusun Ngrombeh bersama Bidan Desa Klopo menyelenggarakan pemeriksaan kesehatan rutin bagi balita dan lansia.\n\nSelain penimbangan berat badan dan pengukuran tinggi badan balita, warga juga mendapatkan penyuluhan gizi seimbang serta pemberian makanan tambahan sehat.'
+                },
+                {
+                    id: 'N3',
+                    tanggal: '2026-10-14',
+                    judul: 'Musyawarah Dusun (Musdus) Penyusunan Rencana Kerja Tahun 2027',
+                    kategori: 'Sosial & Budaya',
+                    gambar: 'https://placehold.co/800x450/166534/facc15?text=Musyawarah+Dusun+Ngrombeh',
+                    isi: 'Bertempat di Balai Dusun Ngrombeh, perangkat dusun bersama tokoh masyarakat, ketua RT/RW, dan perwakilan pemuda mengadakan Musyawarah Dusun untuk menampung usulan prioritas pembangunan tahun anggaran mendatang.'
+                }
+            ],
+            kontak: [
+                { jabatan: 'Kepala Dusun (Kadus) Ngrombeh', nama: 'Bapak Budi Santoso', telp: '6281234567890', icon: 'fa-user-tie' },
+                { jabatan: 'Ketua RW 03 Dusun Ngrombeh', nama: 'Bapak H. Ahmad Muhajir', telp: '6281298765432', icon: 'fa-users-gear' },
+                { jabatan: 'Bidan Desa Klopo', nama: 'Ibu Rina Kusuma, A.Md.Keb', telp: '6285712345678', icon: 'fa-kit-medical' },
+                { jabatan: 'Bhabinkamtibmas / Keamanan', nama: 'Bripka Hendra Wijaya', telp: '6281345678901', icon: 'fa-shield-halved' }
+            ]
+        };
+
+        let appState = JSON.parse(localStorage.getItem('ngrombeh_digital_db')) || JSON.parse(JSON.stringify(DEFAULT_STATE));
+        let isAdminLoggedIn = false;
+        let pendudukChartInstance = null;
+
+        // --- 2. HELPER FUNCTIONS (SENSOR PRIVASI, FORMAT RUPIAH, GOOGLE DRIVE URL) ---
+        function saveStateToLocal() {
+            localStorage.setItem('ngrombeh_digital_db', JSON.stringify(appState));
+        }
+
+        // Sensor NIK: 330809**********
+        function maskNIK(nik) {
+            if (!nik || nik.length < 6) return '****************';
+            return nik.substring(0, 6) + '**********';
+        }
+
+        // Sensor Tanggal Lahir: **-**-1978
+        function maskBirthDate(dateStr) {
+            if (!dateStr) return '**-**-****';
+            const year = dateStr.split('-')[0];
+            return `**-**-${year}`;
+        }
+
+        function formatRupiah(angka) {
+            return 'Rp ' + Number(angka).toLocaleString('id-ID');
+        }
+
+        function formatTanggalIndo(dateStr) {
+            if (!dateStr) return '-';
+            const bulan = ['Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun', 'Jul', 'Agu', 'Sep', 'Okt', 'Nov', 'Des'];
+            const parts = dateStr.split('-');
+            if (parts.length !== 3) return dateStr;
+            return `${parts[2]} ${bulan[parseInt(parts[1], 10) - 1]} ${parts[0]}`;
+        }
+
+        // Konversi link Google Drive file menjadi direct image thumbnail
+        function parseImageUrl(url) {
+            if (!url) return 'https://placehold.co/800x450/15803d/ffffff?text=Dokumentasi+Dusun+Ngrombeh';
+            const driveMatch = url.match(/\/d\/([a-zA-Z0-9_-]+)/);
+            if (driveMatch && driveMatch[1]) {
+                return `https://lh3.googleusercontent.com/d/${driveMatch[1]}=w800`;
+            }
+            return url;
+        }
+
+        function showToast(message, type = 'success') {
+            const container = document.getElementById('toast-container');
+            const toast = document.createElement('div');
+            const bgColor = type === 'success' ? 'bg-green-800 border-yellow-400' : (type === 'error' ? 'bg-red-700 border-red-300' : 'bg-slate-800 border-slate-500');
+            toast.className = `${bgColor} text-white px-4 py-3 rounded-xl shadow-lg border-l-4 text-xs sm:text-sm font-semibold flex items-center gap-2.5 transition-all duration-300`;
+            toast.innerHTML = `<i class="fa-solid ${type === 'success' ? 'fa-circle-check text-yellow-400' : 'fa-circle-exclamation'}"></i><span>${message}</span>`;
+            container.appendChild(toast);
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => toast.remove(), 300);
+            }, 3200);
+        }
+
+        // --- 3. RENDER TAMPILAN DISPLAY PUBLIK ---
+        function renderAll() {
+            applyVisibilitySettings();
+            renderPublicConfig();
+            renderPublicPenduduk();
+            renderPublicKas();
+            renderPublicJadwal();
+            renderPublicBansos();
+            renderPublicBerita();
+            renderPublicKontak();
+            if (isAdminLoggedIn) {
+                renderAdminTables();
+            }
+        }
+
+        function applyVisibilitySettings() {
+            const sections = ['penduduk', 'kas', 'jadwal', 'bansos', 'berita', 'kontak'];
+            sections.forEach(key => {
+                const isVisible = appState.visibility[key];
+                const secEl = document.getElementById(`sec-${key}`);
+                const navEl = document.querySelector(`.nav-link-${key}`);
+                const chkEl = document.getElementById(`vis-${key}`);
+                if (secEl) secEl.style.display = isVisible ? 'block' : 'none';
+                if (navEl) navEl.style.display = isVisible ? 'inline-block' : 'none';
+                if (chkEl) chkEl.checked = isVisible;
+            });
+        }
+
+        function renderPublicConfig() {
+            document.getElementById('running-text-content').textContent = appState.config.runningText;
+            document.getElementById('public-gdrive-link').href = appState.config.gdriveFolder || 'https://drive.google.com';
+            
+            const badge = document.getElementById('sync-status-badge');
+            if (appState.config.gasUrl) {
+                badge.innerHTML = `<i class="fa-solid fa-cloud-check mr-1 text-yellow-400"></i> Terhubung Google Sheets`;
+            } else {
+                badge.innerHTML = `<i class="fa-solid fa-database mr-1 text-yellow-400"></i> Mode Lokal (Siap Sinkron Sheets)`;
+            }
+        }
+
+        function renderPublicPenduduk() {
+            const list = appState.penduduk;
+            const total = list.length;
+            const kk = list.filter(p => p.status === 'Kepala Keluarga').length;
+            const laki = list.filter(p => p.jk === 'L').length;
+            const perempuan = list.filter(p => p.jk === 'P').length;
+
+            document.getElementById('stat-total-jiwa').textContent = total;
+            document.getElementById('stat-total-kk').textContent = kk;
+            document.getElementById('stat-laki').textContent = laki;
+            document.getElementById('stat-perempuan').textContent = perempuan;
+            document.getElementById('stat-laki-pct').textContent = total ? `${Math.round((laki/total)*100)}% dari total` : '0%';
+            document.getElementById('stat-perempuan-pct').textContent = total ? `${Math.round((perempuan/total)*100)}% dari total` : '0%';
+
+            // Filter tabel publik
+            const search = document.getElementById('public-search-warga').value.toLowerCase();
+            const filterRt = document.getElementById('public-filter-rt').value;
+            const filtered = list.filter(w => {
+                const matchName = w.nama.toLowerCase().includes(search);
+                const matchRt = filterRt === 'ALL' || w.rt === filterRt;
+                return matchName && matchRt;
+            });
+
+            const tbody = document.getElementById('public-table-penduduk');
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">Data warga tidak ditemukan.</td></tr>`;
+            } else {
+                tbody.innerHTML = filtered.map(w => `
+                    <tr class="hover:bg-green-50/60 transition">
+                        <td class="py-2.5 px-3 font-semibold text-slate-800">${w.nama}</td>
+                        <td class="py-2.5 px-3 font-mono text-xs text-slate-500 bg-slate-50">${maskNIK(w.nik)}</td>
+                        <td class="py-2.5 px-3 font-mono text-xs text-slate-500">${maskBirthDate(w.tglLahir)}</td>
+                        <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${w.jk === 'L' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">${w.jk}</span></td>
+                        <td class="py-2.5 px-3 font-medium">${w.rt}</td>
+                        <td class="py-2.5 px-3 text-xs text-slate-600">${w.status}</td>
+                    </tr>
+                `).join('');
+            }
+
+            // Update Grafik RT
+            const rtCounts = ['RT 01', 'RT 02', 'RT 03', 'RT 04'].map(rt => list.filter(w => w.rt === rt).length);
+            const ctx = document.getElementById('chartPenduduk').getContext('2d');
+            if (pendudukChartInstance) pendudukChartInstance.destroy();
+            pendudukChartInstance = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['RT 01', 'RT 02', 'RT 03', 'RT 04'],
+                    datasets: [{
+                        data: rtCounts,
+                        backgroundColor: ['#15803d', '#eab308', '#22c55e', '#ca8a04'],
+                        borderWidth: 2,
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { position: 'bottom', labels: { font: { family: 'Inter', size: 11 } } }
+                    }
+                }
+            });
+        }
+
+        function renderPublicKas() {
+            let masuk = 0, keluar = 0;
+            appState.kas.forEach(k => {
+                if (k.jenis === 'Pemasukan') masuk += Number(k.nominal);
+                else keluar += Number(k.nominal);
+            });
+            const saldo = masuk - keluar;
+
+            document.getElementById('kas-saldo').textContent = formatRupiah(saldo);
+            document.getElementById('kas-masuk').textContent = formatRupiah(masuk);
+            document.getElementById('kas-keluar').textContent = formatRupiah(keluar);
+
+            const tbody = document.getElementById('public-table-kas');
+            tbody.innerHTML = appState.kas.slice().reverse().map(k => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-3 px-4 text-slate-600 whitespace-nowrap">${formatTanggalIndo(k.tanggal)}</td>
+                    <td class="py-3 px-4 font-medium text-slate-800">${k.keterangan}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${k.jenis === 'Pemasukan' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">
+                            ${k.jenis}
+                        </span>
+                    </td>
+                    <td class="py-3 px-4 text-right font-bold ${k.jenis === 'Pemasukan' ? 'text-emerald-700' : 'text-rose-600'}">
+                        ${k.jenis === 'Pemasukan' ? '+' : '-'} ${formatRupiah(k.nominal)}
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPublicJadwal() {
+            const grid = document.getElementById('public-grid-jadwal');
+            grid.innerHTML = appState.jadwal.map(j => `
+                <div class="bg-white p-5 rounded-2xl shadow-sm border border-slate-200 hover:border-green-500 transition flex flex-col justify-between">
+                    <div>
+                        <div class="flex items-center justify-between gap-2 mb-3">
+                            <span class="bg-green-100 text-green-800 text-xs font-extrabold px-3 py-1 rounded-lg">
+                                <i class="fa-regular fa-calendar mr-1"></i> ${formatTanggalIndo(j.tanggal)}
+                            </span>
+                            <span class="text-xs font-semibold text-amber-700 bg-yellow-100 px-2.5 py-1 rounded-lg">
+                                ${j.waktu}
+                            </span>
+                        </div>
+                        <h3 class="font-extrabold text-slate-900 text-base mb-2">${j.judul}</h3>
+                        <div class="space-y-1.5 text-xs text-slate-600">
+                            <p><i class="fa-solid fa-location-dot text-green-700 w-4"></i> <strong>Lokasi:</strong> ${j.lokasi}</p>
+                            <p><i class="fa-solid fa-users text-yellow-600 w-4"></i> <strong>Peserta:</strong> ${j.sasaran}</p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderPublicBansos() {
+            const search = document.getElementById('public-search-bansos').value.toLowerCase();
+            const filtered = appState.bansos.filter(b => b.nama.toLowerCase().includes(search) || b.program.toLowerCase().includes(search));
+            const tbody = document.getElementById('public-table-bansos');
+
+            if (filtered.length === 0) {
+                tbody.innerHTML = `<tr><td colspan="6" class="py-6 text-center text-slate-400">Data penerima bansos tidak ditemukan.</td></tr>`;
+                return;
+            }
+
+            tbody.innerHTML = filtered.map((b, idx) => `
+                <tr class="hover:bg-green-50/50">
+                    <td class="py-3 px-4 text-slate-500">${idx + 1}</td>
+                    <td class="py-3 px-4 font-bold text-slate-800">${b.nama}</td>
+                    <td class="py-3 px-4 font-medium">${b.rt}</td>
+                    <td class="py-3 px-4"><span class="bg-yellow-100 text-yellow-900 font-bold px-2.5 py-1 rounded-lg text-xs">${b.program}</span></td>
+                    <td class="py-3 px-4 text-slate-600">${b.periode}</td>
+                    <td class="py-3 px-4">
+                        <span class="px-2.5 py-1 rounded-full text-xs font-bold ${b.status === 'Tersalurkan' ? 'bg-emerald-100 text-emerald-800' : 'bg-amber-100 text-amber-800'}">
+                            ${b.status}
+                        </span>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function renderPublicBerita() {
+            const kat = document.getElementById('public-filter-berita').value;
+            const filtered = appState.berita.filter(n => kat === 'ALL' || n.kategori === kat);
+            const grid = document.getElementById('public-grid-berita');
+
+            grid.innerHTML = filtered.map(n => `
+                <article class="bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col justify-between hover:shadow-md transition group">
+                    <div>
+                        <div class="relative h-48 bg-slate-200 overflow-hidden">
+                            <img src="${parseImageUrl(n.gambar)}" onerror="this.src='https://placehold.co/800x450/15803d/ffffff?text=Kegiatan+Dusun+Ngrombeh'" alt="${n.judul}" class="w-full h-full object-cover group-hover:scale-105 transition duration-300">
+                            <span class="absolute top-3 left-3 bg-yellow-400 text-green-950 text-[11px] font-extrabold px-2.5 py-1 rounded-lg shadow">
+                                ${n.kategori}
+                            </span>
+                        </div>
+                        <div class="p-5">
+                            <div class="text-xs text-green-700 font-semibold mb-1.5">
+                                <i class="fa-regular fa-clock mr-1"></i> ${formatTanggalIndo(n.tanggal)}
+                            </div>
+                            <h3 class="font-extrabold text-slate-900 text-base leading-snug mb-2 line-clamp-2">${n.judul}</h3>
+                            <p class="text-xs text-slate-600 line-clamp-3 leading-relaxed">${n.isi}</p>
+                        </div>
+                    </div>
+                    <div class="px-5 pb-5">
+                        <button onclick="openReadBerita('${n.id}')" class="w-full py-2.5 bg-green-50 hover:bg-green-700 text-green-800 hover:text-white font-bold rounded-xl text-xs transition">
+                            Baca Selengkapnya <i class="fa-solid fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
+                </article>
+            `).join('');
+        }
+
+        function renderPublicKontak() {
+            const grid = document.getElementById('public-grid-kontak');
+            grid.innerHTML = appState.kontak.map(c => `
+                <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex items-center justify-between gap-3">
+                    <div class="flex items-center gap-3">
+                        <div class="w-11 h-11 rounded-xl bg-green-100 text-green-800 flex items-center justify-center text-lg shrink-0">
+                            <i class="fa-solid ${c.icon}"></i>
+                        </div>
+                        <div>
+                            <div class="text-[11px] font-bold text-slate-400 uppercase">${c.jabatan}</div>
+                            <div class="font-extrabold text-slate-800 text-sm">${c.nama}</div>
+                        </div>
+                    </div>
+                    <a href="https://wa.me/${c.telp}" target="_blank" rel="noopener noreferrer" class="px-3 py-2 bg-emerald-600 hover:bg-emerald-500 text-white rounded-xl text-xs font-bold shrink-0 shadow-sm">
+                        <i class="fa-brands fa-whatsapp mr-1"></i> Chat
+                    </a>
+                </div>
+            `).join('');
+        }
+
+        function openReadBerita(id) {
+            const item = appState.berita.find(b => b.id === id);
+            if (!item) return;
+            document.getElementById('read-berita-img').src = parseImageUrl(item.gambar);
+            document.getElementById('read-berita-kat').textContent = item.kategori;
+            document.getElementById('read-berita-tgl').textContent = `Dipublikasikan pada ${formatTanggalIndo(item.tanggal)} • Dusun Ngrombeh`;
+            document.getElementById('read-berita-judul').textContent = item.judul;
+            document.getElementById('read-berita-isi').textContent = item.isi;
+            document.getElementById('modal-baca-berita').classList.remove('hidden');
+        }
+
+        // --- 4. SISTEM LOGIN & NAVIGASI MODE DEVELOPER ---
+        function openLoginModal() {
+            if (isAdminLoggedIn) {
+                switchView('admin');
+                return;
+            }
+            document.getElementById('login-pin-input').value = '';
+            document.getElementById('modal-login').classList.remove('hidden');
+        }
+
+        function closeModal(id) {
+            document.getElementById(id).classList.add('hidden');
+        }
+
+        function handleAdminLogin(e) {
+            e.preventDefault();
+            const pin = document.getElementById('login-pin-input').value;
+            if (pin === appState.config.adminPin) {
+                isAdminLoggedIn = true;
+                closeModal('modal-login');
+                document.getElementById('dev-banner').classList.remove('hidden');
+                document.getElementById('header-admin-btn').classList.add('hidden');
+                switchView('admin');
+                showToast('Berhasil masuk ke Mode Developer Dusun Ngrombeh!');
+            } else {
+                showToast('PIN Developer salah! Coba: ngrombeh2026', 'error');
+            }
+        }
+
+        function logoutAdmin() {
+            isAdminLoggedIn = false;
+            document.getElementById('dev-banner').classList.add('hidden');
+            document.getElementById('header-admin-btn').classList.remove('hidden');
+            switchView('public');
+            showToast('Anda telah keluar dari Mode Developer.');
+        }
+
+        function switchView(mode) {
+            const publicView = document.getElementById('public-view');
+            const adminView = document.getElementById('admin-view');
+            const publicNav = document.getElementById('public-nav');
+            const btnToPublic = document.getElementById('btn-view-public');
+            const btnToAdmin = document.getElementById('btn-view-admin');
+
+            if (mode === 'admin' && isAdminLoggedIn) {
+                publicView.classList.add('hidden');
+                publicNav.classList.add('hidden');
+                adminView.classList.remove('hidden');
+                btnToPublic.classList.remove('hidden');
+                btnToAdmin.classList.add('hidden');
+                renderAdminTables();
+                loadConfigInputs();
+            } else {
+                adminView.classList.add('hidden');
+                publicView.classList.remove('hidden');
+                publicNav.classList.remove('hidden');
+                if (isAdminLoggedIn) {
+                    btnToPublic.classList.add('hidden');
+                    btnToAdmin.classList.remove('hidden');
+                }
+                renderAll();
+            }
+        }
+
+        function switchAdminTab(tabId) {
+            document.querySelectorAll('.admin-tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.admin-tab-btn').forEach(btn => {
+                btn.classList.remove('bg-white', 'text-green-800', 'border-t-2', 'border-x', 'border-green-700');
+                btn.classList.add('text-slate-600');
+            });
+            document.getElementById(tabId).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.add('bg-white', 'text-green-800', 'border-t-2', 'border-x', 'border-green-700');
+            activeBtn.classList.remove('text-slate-600');
+        }
+
+        function updateVisibilitySetting(key, isChecked) {
+            appState.visibility[key] = isChecked;
+            saveStateToLocal();
+            applyVisibilitySettings();
+            showToast(`Visibilitas bagian "${key.toUpperCase()}" diubah menjadi ${isChecked ? 'TAMPIL' : 'DISEMBUNYIKAN'}.`);
+        }
+
+        // --- 5. RENDER TABEL & CRUD PANEL DEVELOPER ---
+        function renderAdminTables() {
+            // Tabel Penduduk (NIK & Tgl Lahir ASLI tanpa sensor)
+            document.getElementById('admin-table-penduduk').innerHTML = appState.penduduk.map(w => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-2.5 px-3 font-mono text-xs font-bold text-slate-700">${w.nik}</td>
+                    <td class="py-2.5 px-3 font-bold text-slate-900">${w.nama}</td>
+                    <td class="py-2.5 px-3 text-xs">${w.tglLahir}</td>
+                    <td class="py-2.5 px-3">${w.jk}</td>
+                    <td class="py-2.5 px-3">${w.rt}</td>
+                    <td class="py-2.5 px-3 text-xs">${w.status}</td>
+                    <td class="py-2.5 px-3 text-center space-x-1">
+                        <button onclick="openModalPenduduk('${w.id}')" class="px-2 py-1 bg-amber-100 text-amber-800 rounded hover:bg-amber-200 text-xs font-bold"><i class="fa-solid fa-pen"></i></button>
+                        <button onclick="deleteItem('penduduk', '${w.id}')" class="px-2 py-1 bg-rose-100 text-rose-700 rounded hover:bg-rose-200 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Tabel Kas
+            document.getElementById('admin-table-kas').innerHTML = appState.kas.map(k => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-2.5 px-3 text-xs">${k.tanggal}</td>
+                    <td class="py-2.5 px-3 font-medium">${k.keterangan}</td>
+                    <td class="py-2.5 px-3"><span class="px-2 py-0.5 rounded text-xs font-bold ${k.jenis === 'Pemasukan' ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-700'}">${k.jenis}</span></td>
+                    <td class="py-2.5 px-3 text-right font-bold">${formatRupiah(k.nominal)}</td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button onclick="deleteItem('kas', '${k.id}')" class="px-2 py-1 bg-rose-100 text-rose-700 rounded hover:bg-rose-200 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Tabel Jadwal
+            document.getElementById('admin-table-jadwal').innerHTML = appState.jadwal.map(j => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-2.5 px-3 text-xs">${j.tanggal} (${j.waktu})</td>
+                    <td class="py-2.5 px-3 font-bold">${j.judul}</td>
+                    <td class="py-2.5 px-3 text-xs">${j.lokasi}</td>
+                    <td class="py-2.5 px-3 text-xs">${j.sasaran}</td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button onclick="deleteItem('jadwal', '${j.id}')" class="px-2 py-1 bg-rose-100 text-rose-700 rounded hover:bg-rose-200 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Tabel Bansos
+            document.getElementById('admin-table-bansos').innerHTML = appState.bansos.map(b => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-2.5 px-3 font-bold">${b.nama}</td>
+                    <td class="py-2.5 px-3">${b.rt}</td>
+                    <td class="py-2.5 px-3 text-xs font-semibold">${b.program}</td>
+                    <td class="py-2.5 px-3 text-xs">${b.periode}</td>
+                    <td class="py-2.5 px-3 text-xs">${b.status}</td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button onclick="deleteItem('bansos', '${b.id}')" class="px-2 py-1 bg-rose-100 text-rose-700 rounded hover:bg-rose-200 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+
+            // Tabel Berita
+            document.getElementById('admin-table-berita').innerHTML = appState.berita.map(n => `
+                <tr class="hover:bg-slate-50">
+                    <td class="py-2.5 px-3 text-xs">${n.tanggal}</td>
+                    <td class="py-2.5 px-3 font-bold">${n.judul}</td>
+                    <td class="py-2.5 px-3 text-xs">${n.kategori}</td>
+                    <td class="py-2.5 px-3 text-xs text-blue-600 truncate max-w-[150px]">${n.gambar || '-'}</td>
+                    <td class="py-2.5 px-3 text-center">
+                        <button onclick="deleteItem('berita', '${n.id}')" class="px-2 py-1 bg-rose-100 text-rose-700 rounded hover:bg-rose-200 text-xs font-bold"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function deleteItem(collection, id) {
+            appState[collection] = appState[collection].filter(item => item.id !== id);
+            saveStateToLocal();
+            renderAll();
+            showToast('Data berhasil dihapus.');
+        }
+
+        // CRUD Penduduk
+        function openModalPenduduk(editId = null) {
+            document.getElementById('edit-penduduk-id').value = editId || '';
+            if (editId) {
+                const w = appState.penduduk.find(item => item.id === editId);
+                document.getElementById('title-modal-penduduk').textContent = 'Edit Data Penduduk';
+                document.getElementById('inp-nik').value = w.nik;
+                document.getElementById('inp-nama').value = w.nama;
+                document.getElementById('inp-tgllahir').value = w.tglLahir;
+                document.getElementById('inp-jk').value = w.jk;
+                document.getElementById('inp-rt').value = w.rt;
+                document.getElementById('inp-status-kk').value = w.status;
+            } else {
+                document.getElementById('title-modal-penduduk').textContent = 'Tambah Data Penduduk';
+                document.getElementById('inp-nik').value = '';
+                document.getElementById('inp-nama').value = '';
+                document.getElementById('inp-tgllahir').value = '1990-01-01';
+            }
+            document.getElementById('modal-form-penduduk').classList.remove('hidden');
+        }
+
+        function savePenduduk(e) {
+            e.preventDefault();
+            const editId = document.getElementById('edit-penduduk-id').value;
+            const data = {
+                id: editId || 'P' + Date.now(),
+                nik: document.getElementById('inp-nik').value.trim(),
+                nama: document.getElementById('inp-nama').value.trim(),
+                tglLahir: document.getElementById('inp-tgllahir').value,
+                jk: document.getElementById('inp-jk').value,
+                rt: document.getElementById('inp-rt').value,
+                status: document.getElementById('inp-status-kk').value
+            };
+            if (editId) {
+                const idx = appState.penduduk.findIndex(item => item.id === editId);
+                appState.penduduk[idx] = data;
+            } else {
+                appState.penduduk.push(data);
+            }
+            saveStateToLocal();
+            closeModal('modal-form-penduduk');
+            renderAll();
+            showToast('Data penduduk berhasil disimpan!');
+        }
+
+        // CRUD Kas
+        function openModalKas() {
+            document.getElementById('inp-kas-tgl').value = new Date().toISOString().split('T')[0];
+            document.getElementById('inp-kas-ket').value = '';
+            document.getElementById('inp-kas-nominal').value = '';
+            document.getElementById('modal-form-kas').classList.remove('hidden');
+        }
+
+        function saveKas(e) {
+            e.preventDefault();
+            appState.kas.push({
+                id: 'K' + Date.now(),
+                tanggal: document.getElementById('inp-kas-tgl').value,
+                keterangan: document.getElementById('inp-kas-ket').value.trim(),
+                jenis: document.getElementById('inp-kas-jenis').value,
+                nominal: Number(document.getElementById('inp-kas-nominal').value)
+            });
+            saveStateToLocal();
+            closeModal('modal-form-kas');
+            renderAll();
+            showToast('Transaksi kas dusun dicatat!');
+        }
+
+        // CRUD Jadwal
+        function openModalJadwal() {
+            document.getElementById('inp-jad-tgl').value = new Date().toISOString().split('T')[0];
+            document.getElementById('modal-form-jadwal').classList.remove('hidden');
+        }
+
+        function saveJadwal(e) {
+            e.preventDefault();
+            appState.jadwal.push({
+                id: 'J' + Date.now(),
+                judul: document.getElementById('inp-jad-judul').value.trim(),
+                tanggal: document.getElementById('inp-jad-tgl').value,
+                waktu: document.getElementById('inp-jad-waktu').value.trim(),
+                lokasi: document.getElementById('inp-jad-lokasi').value.trim(),
+                sasaran: document.getElementById('inp-jad-sasaran').value.trim()
+            });
+            saveStateToLocal();
+            closeModal('modal-form-jadwal');
+            renderAll();
+            showToast('Jadwal kegiatan ditambahkan!');
+        }
+
+        // CRUD Bansos
+        function openModalBansos() {
+            document.getElementById('inp-ban-nama').value = '';
+            document.getElementById('modal-form-bansos').classList.remove('hidden');
+        }
+
+        function saveBansos(e) {
+            e.preventDefault();
+            appState.bansos.push({
+                id: 'B' + Date.now(),
+                nama: document.getElementById('inp-ban-nama').value.trim(),
+                rt: document.getElementById('inp-ban-rt').value,
+                program: document.getElementById('inp-ban-prog').value,
+                periode: document.getElementById('inp-ban-periode').value.trim(),
+                status: document.getElementById('inp-ban-status').value
+            });
+            saveStateToLocal();
+            closeModal('modal-form-bansos');
+            renderAll();
+            showToast('Data penerima bansos ditambahkan!');
+        }
+
+        // CRUD Berita
+        function openModalBerita() {
+            document.getElementById('inp-ber-tgl').value = new Date().toISOString().split('T')[0];
+            document.getElementById('inp-ber-judul').value = '';
+            document.getElementById('inp-ber-img').value = '';
+            document.getElementById('inp-ber-isi').value = '';
+            document.getElementById('modal-form-berita').classList.remove('hidden');
+        }
+
+        function saveBerita(e) {
+            e.preventDefault();
+            appState.berita.unshift({
+                id: 'N' + Date.now(),
+                tanggal: document.getElementById('inp-ber-tgl').value,
+                judul: document.getElementById('inp-ber-judul').value.trim(),
+                kategori: document.getElementById('inp-ber-kat').value,
+                gambar: document.getElementById('inp-ber-img').value.trim(),
+                isi: document.getElementById('inp-ber-isi').value.trim()
+            });
+            saveStateToLocal();
+            closeModal('modal-form-berita');
+            renderAll();
+            showToast('Berita & dokumentasi berhasil dipublikasikan!');
+        }
+
+        // --- 6. INTEGRASI GOOGLE SHEETS & GOOGLE DRIVE ---
+        function loadConfigInputs() {
+            document.getElementById('cfg-gas-url').value = appState.config.gasUrl || '';
+            document.getElementById('cfg-gdrive-folder').value = appState.config.gdriveFolder || '';
+            document.getElementById('cfg-running-text').value = appState.config.runningText || '';
+            document.getElementById('cfg-admin-pin').value = appState.config.adminPin || 'ngrombeh2026';
+        }
+
+        function saveIntegrationConfig() {
+            appState.config.gasUrl = document.getElementById('cfg-gas-url').value.trim();
+            appState.config.gdriveFolder = document.getElementById('cfg-gdrive-folder').value.trim();
+            appState.config.runningText = document.getElementById('cfg-running-text').value.trim();
+            appState.config.adminPin = document.getElementById('cfg-admin-pin').value.trim() || 'ngrombeh2026';
+            saveStateToLocal();
+            renderPublicConfig();
+            showToast('Konfigurasi Google Sheets, Drive & Pengumuman disimpan!');
+        }
+
+        function copyGasScript() {
+            const textarea = document.getElementById('gas-script-code');
+            textarea.select();
+            document.execCommand('copy');
+            showToast('Kode Google Apps Script berhasil disalin ke clipboard!');
+        }
+
+        async function pushAllToGoogleSheets() {
+            const url = appState.config.gasUrl;
+            if (!url) {
+                showToast('URL Google Apps Script belum diisi! Buka tab "Integrasi Sheets & Drive" untuk mengaturnya.', 'error');
+                switchAdminTab('tab-integrasi');
+                return;
+            }
+            try {
+                showToast('Mengirim seluruh database ke Google Spreadsheets...', 'info');
+                await fetch(url, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(appState)
+                });
+                showToast('Data berhasil dikirim & disinkronkan ke Google Sheets!');
+            } catch (err) {
+                showToast('Gagal menghubungi Google Sheets: ' + err.message, 'error');
+            }
+        }
+
+        async function syncFromGoogleSheets() {
+            const url = appState.config.gasUrl;
+            const icon = document.getElementById('sync-icon');
+            icon.classList.add('fa-spin');
+
+            if (!url) {
+                setTimeout(() => {
+                    icon.classList.remove('fa-spin');
+                    renderAll();
+                    showToast('Data lokal disegarkan. Hubungkan URL Google Sheets di Mode Developer untuk sinkron cloud.');
+                }, 600);
+                return;
+            }
+
+            try {
+                const res = await fetch(url);
+                const cloudData = await res.json();
+                if (cloudData && cloudData.penduduk) {
+                    appState = { ...appState, ...cloudData };
+                    saveStateToLocal();
+                    renderAll();
+                    showToast('Berhasil menarik data terbaru dari Google Sheets!');
+                } else {
+                    showToast('Google Sheets terhubung, namun belum ada data tersimpan di Sheet.', 'info');
+                }
+            } catch (err) {
+                showToast('Gagal menarik data dari Google Sheets. Periksa izin akses Web App (Anyone).', 'error');
+            } finally {
+                icon.classList.remove('fa-spin');
+            }
+        }
+
+        function testGoogleSheetsConnection() {
+            saveIntegrationConfig();
+            syncFromGoogleSheets();
+        }
+
+        function resetDemoData() {
+            appState = JSON.parse(JSON.stringify(DEFAULT_STATE));
+            saveStateToLocal();
+            renderAll();
+            loadConfigInputs();
+            showToast('Database berhasil dikembalikan ke data awal Dusun Ngrombeh.');
+        }
+
+        // Inisialisasi saat halaman dimuat
+        window.onload = function() {
+            renderAll();
+        };
+    </script>
+</body>
+</html>
+```
